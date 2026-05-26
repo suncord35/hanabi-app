@@ -21,148 +21,190 @@ const stSettingsData = [
 ];
 
 export default function Home() {
+  const [games, setGames] = useState("");
+  const [bells, setBells] = useState("");
 
-  const [games, setGames] = useState<number>(0);
-  const [bells, setBells] = useState<number>(0);
+  const [episodeBonus, setEpisodeBonus] =
+    useState("");
 
-  const [episodeBonus, setEpisodeBonus] = useState<number>(0);
-  const [surugaBonus, setSurugaBonus] = useState<number>(0);
-  const [surugaST, setSurugaST] = useState<number>(0);
+  const [surugaBonus, setSurugaBonus] =
+    useState("");
 
-  const [tetsugetaCount, setTetsugetaCount] = useState<number>(0);
-  const [memberCount, setMemberCount] = useState<number>(0);
-  const [mizugiCount, setMizugiCount] = useState<number>(0);
+  const [surugaST, setSurugaST] =
+    useState("");
 
+  const [tetsugetaCount, setTetsugetaCount] =
+    useState("");
+
+  const [memberCount, setMemberCount] =
+    useState("");
+
+  const [mizugiCount, setMizugiCount] =
+    useState("");
+
+  // 下段ベル確率
   const bellRate =
-    games > 0 && bells > 0
-      ? (games / bells).toFixed(1)
+    Number(games) > 0 &&
+    Number(bells) > 0
+      ? (
+          Number(games) /
+          Number(bells)
+        ).toFixed(1)
       : null;
 
+  // ボーナス合計
   const totalBonus =
-    episodeBonus + surugaBonus;
+    Number(episodeBonus) +
+    Number(surugaBonus);
 
+  // ST合計
   const totalST =
-    episodeBonus + surugaST;
+    Number(episodeBonus) +
+    Number(surugaST);
 
+  // ST突入率
   const stRate =
     totalBonus > 0
-      ? ((totalST / totalBonus) * 100).toFixed(1)
+      ? (
+          (totalST / totalBonus) *
+          100
+        ).toFixed(1)
       : null;
 
+  // 下段ベル比較
   const comparison = bellRate
     ? settingsData.map((item) => {
+        const difference = Math.abs(
+          Number(bellRate) - item.rate
+        );
 
-      const difference = Math.abs(
-        Number(bellRate) - item.rate
-      );
+        const score =
+          1 / (difference + 1);
 
-      const score = 1 / (difference + 1);
-
-      return {
-        ...item,
-        difference,
-        score,
-      };
-    })
+        return {
+          ...item,
+          difference,
+          score,
+        };
+      })
     : [];
 
+  // ST比較
   const stComparison = stRate
     ? stSettingsData.map((item) => {
+        const difference = Math.abs(
+          Number(stRate) - item.rate
+        );
 
-      const difference = Math.abs(
-        Number(stRate) - item.rate
-      );
+        const score =
+          1 / (difference + 1);
 
-      const score = 1 / (difference + 1);
-
-      return {
-        ...item,
-        difference,
-        score,
-      };
-    })
+        return {
+          ...item,
+          difference,
+          score,
+        };
+      })
     : [];
 
-  const combinedData = settingsData.map((item) => {
+  // 総合判定
+  const combinedData = settingsData.map(
+    (item) => {
+      const bellItem = comparison.find(
+        (c) =>
+          c.setting === item.setting
+      );
 
-    const bellItem = comparison.find(
-      (c) => c.setting === item.setting
-    );
+      const stItem = stComparison.find(
+        (s) =>
+          s.setting === item.setting
+      );
 
-    const stItem = stComparison.find(
-      (s) => s.setting === item.setting
-    );
+      let totalScore =
+        (bellItem?.score || 0) +
+        (stItem?.score || 0);
 
-    let totalScore =
-      (bellItem?.score || 0) +
-      (stItem?.score || 0);
+      // 甲鉄城メンバー加点
+      if (item.setting >= 4) {
+        totalScore +=
+          Number(memberCount) * 2;
+      }
 
-    // 甲鉄城メンバー
-    if (item.setting >= 4) {
-      totalScore += memberCount * 2;
+      // 水着加点
+      if (item.setting === 6) {
+        totalScore +=
+          Number(mizugiCount) * 999;
+      }
+
+      return {
+        setting: item.setting,
+        rate: item.rate,
+        totalScore,
+      };
     }
-
-    // 水着
-    if (item.setting === 6) {
-      totalScore += mizugiCount * 999;
-    }
-
-    return {
-      setting: item.setting,
-      rate: item.rate,
-      totalScore,
-    };
-  });
-
-  const combinedTotal = combinedData.reduce(
-    (sum, item) => sum + item.totalScore,
-    0
   );
 
-  const finalProbability = combinedData.map(
-    (item) => ({
+  const combinedTotal =
+    combinedData.reduce(
+      (sum, item) =>
+        sum + item.totalScore,
+      0
+    );
+
+  const finalProbability =
+    combinedData.map((item) => ({
       ...item,
       probability:
         combinedTotal > 0
           ? (
-            (item.totalScore / combinedTotal) * 100
-          ).toFixed(1)
+              (item.totalScore /
+                combinedTotal) *
+              100
+            ).toFixed(1)
           : "0.0",
-    })
-  );
+    }));
 
+  // 最も近い設定
   const closestSetting =
     finalProbability.length > 0
-      ? finalProbability.reduce((prev, current) =>
-        Number(prev.probability) >
-          Number(current.probability)
-          ? prev
-          : current
-      )
+      ? finalProbability.reduce(
+          (prev, current) =>
+            Number(prev.probability) >
+            Number(current.probability)
+              ? prev
+              : current
+        )
       : null;
 
+  // カウンター入力
   const CounterInput = ({
     label,
     value,
     setValue,
   }: {
     label: string;
-    value: number;
-    setValue: React.Dispatch<React.SetStateAction<number>>;
+    value: string;
+    setValue: React.Dispatch<
+      React.SetStateAction<string>
+    >;
   }) => (
     <div className="mb-4">
-
       <label className="block mb-2 font-bold">
         {label}
       </label>
 
       <div className="flex items-center gap-2">
-
+        {/* マイナス */}
         <button
           type="button"
           onClick={() =>
             setValue((prev) =>
-              Math.max(0, prev - 1)
+              String(
+                Math.max(
+                  0,
+                  Number(prev || 0) - 1
+                )
+              )
             )
           }
           className="w-12 h-12 rounded-lg border text-2xl font-bold bg-neutral-300"
@@ -170,48 +212,50 @@ export default function Home() {
           −
         </button>
 
+        {/* 入力欄 */}
         <input
           type="number"
           value={value}
           onChange={(e) =>
-            setValue(Number(e.target.value) || 0)
+            setValue(e.target.value)
           }
-          className="flex-1 border rounded-lg p-3 text-center text-2xl font-bold"
+          className="w-32 border rounded-lg p-3 text-center text-2xl font-bold"
           placeholder="0"
         />
 
+        {/* プラス */}
         <button
           type="button"
           onClick={() =>
-            setValue((prev) => prev + 1)
+            setValue((prev) =>
+              String(
+                Number(prev || 0) + 1
+              )
+            )
           }
           className="w-12 h-12 rounded-lg bg-emerald-500 text-white text-2xl font-bold"
         >
           ＋
         </button>
-
       </div>
     </div>
   );
 
   return (
     <main className="min-h-screen bg-neutral-100 p-6">
-
       <div className="max-w-md mx-auto bg-white rounded-xl shadow p-6">
-
         <h1 className="text-neutral-800 font-bold mb-6 text-center">
-          <span className="block">
+          <span className="block text-3xl">
             スマスロ カバネリ
           </span>
 
-          <span className="block text-blue-500">
+          <span className="block text-blue-500 text-2xl mt-1">
             設定判別
           </span>
         </h1>
 
         {/* 総ゲーム数 */}
-        <div className="mb-4">
-
+        <div className="mb-6">
           <label className="block mb-2 font-bold">
             総ゲーム数
           </label>
@@ -220,9 +264,9 @@ export default function Home() {
             type="number"
             value={games}
             onChange={(e) =>
-              setGames(Number(e.target.value) || 0)
+              setGames(e.target.value)
             }
-            className="w-full border rounded-lg p-3"
+            className="w-full border rounded-lg p-3 text-2xl font-bold"
             placeholder="0"
           />
         </div>
@@ -279,7 +323,6 @@ export default function Home() {
 
         {bellRate && (
           <div className="bg-gray-100 rounded-lg p-4">
-
             {closestSetting && (
               <p className="text-xl font-bold text-blue-600 mb-2">
                 現在もっとも近いのは設定
@@ -288,12 +331,14 @@ export default function Home() {
             )}
 
             <p className="text-lg font-bold">
-              下段ベル実測確率：1/{bellRate}
+              下段ベル実測確率：
+              1/{bellRate}
             </p>
 
             {stRate && (
               <p className="text-lg font-bold mt-2">
-                ST突入率：{stRate}%
+                ST突入率：
+                {stRate}%
               </p>
             )}
           </div>
@@ -301,45 +346,41 @@ export default function Home() {
 
         {bellRate && (
           <div className="mt-4">
-
             <h2 className="font-bold mb-2">
               設定別比較
             </h2>
 
             <div className="space-y-2">
-
-              {finalProbability.map((item) => (
-
-                <div
-                  key={item.setting}
-                  className={`border rounded-lg p-3 ${item.setting ===
-                    closestSetting?.setting
-                    ? "bg-blue-100 border-blue-500"
-                    : ""
+              {finalProbability.map(
+                (item) => (
+                  <div
+                    key={item.setting}
+                    className={`border rounded-lg p-3 ${
+                      item.setting ===
+                      closestSetting?.setting
+                        ? "bg-blue-100 border-blue-500"
+                        : ""
                     }`}
-                >
+                  >
+                    <p>
+                      設定{item.setting}
+                    </p>
 
-                  <p>
-                    設定{item.setting}
-                  </p>
+                    <p>
+                      設定別下段ベル確率：
+                      1/{item.rate}
+                    </p>
 
-                  <p>
-                    設定別下段ベル確率：
-                    1/{item.rate}
-                  </p>
-
-                  <p>
-                    設定期待度：
-                    {item.probability}%
-                  </p>
-
-                </div>
-              ))}
-
+                    <p>
+                      設定期待度：
+                      {item.probability}%
+                    </p>
+                  </div>
+                )
+              )}
             </div>
           </div>
         )}
-
       </div>
     </main>
   );
