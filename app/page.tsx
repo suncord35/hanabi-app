@@ -16,12 +16,12 @@ const settingsData = [
 ];
 
 const stSettingsData = [
-  { setting: 1, rate: 52 },
-  { setting: 2, rate: 54 },
-  { setting: 3, rate: 56 },
-  { setting: 4, rate: 60 },
-  { setting: 5, rate: 63 },
-  { setting: 6, rate: 66 },
+  { setting: 1, rate: 60.2 },
+  { setting: 2, rate: 59.7 },
+  { setting: 3, rate: 60.1 },
+  { setting: 4, rate: 60.0 },
+  { setting: 5, rate: 61.1 },
+  { setting: 6, rate: 61.3 },
 ];
 
 function CounterInput({
