@@ -24,3 +24,39 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* REGハズレ確定チェック時のボックス演出 */
+@keyframes reg-miss-alert {
+  0% {
+    border-color: rgba(255, 255, 255, 0.15);
+    background-color: rgba(15, 23, 42, 0.4);
+    box-shadow: 0 0 0 0 rgba(229, 57, 53, 0);
+  }
+  35% {
+    border-color: #ff5252;
+    background-color: rgba(229, 57, 53, 0.38);
+    box-shadow: 0 0 14px 3px rgba(229, 57, 53, 0.55);
+  }
+  100% {
+    border-color: #e53935;
+    background-color: rgba(229, 57, 53, 0.24);
+    box-shadow: 0 0 0 1px rgba(229, 57, 53, 0.35);
+  }
+}
+
+.reg-miss-box {
+  transition:
+    border-color 0.55s ease,
+    background-color 0.55s ease,
+    box-shadow 0.55s ease;
+}
+
+.reg-miss-box--checked {
+  border-color: #e53935;
+  background-color: rgba(229, 57, 53, 0.24);
+  box-shadow: 0 0 0 1px rgba(229, 57, 53, 0.35);
+}
+
+.reg-miss-box--animate-in {
+  animation: reg-miss-alert 0.6s ease-out forwards;
+}
